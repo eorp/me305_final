@@ -4,6 +4,7 @@ import 'package:me305_final/services/station_services.dart';
 import 'package:me305_final/pages/station_page.dart';
 import 'package:me305_final/model/station_details.dart';
 import 'package:me305_final/presentation/custom_icons_icons.dart' as CustomIcons;
+import 'package:me305_final/pages/stations_list.dart';
 
 
 
@@ -29,7 +30,16 @@ class _HomePageState extends State<HomePage> {
       Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => StationPage(station: station, originLat: lat.toString(), originLng: lng.toString(),),
+            builder: (context) => StationPage(station: station, originLat: lat.toString(), originLng: lng.toString()),
+          )
+      );
+    }
+    void goToListPage(List<StationDetails> stations, double lat, double lng) {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            //builder: (context) => StationPage(station: station, originLat: lat.toString(), originLng: lng.toString()),
+            builder: (context) => StationsList(stations: stations, lat: lat.toString(), lng: lng.toString()),
           )
       );
     }
@@ -125,12 +135,13 @@ class _HomePageState extends State<HomePage> {
                             userLocation = value;
                           });
                           if(userLocation != null) {
-                            _getStationDetails(
+                            _getStationDetailsList(
                                 userLocation["latitude"], userLocation["longitude"])
                                 .then((onValue) {
                               //print(onValue.toString());
                               (onValue != null) ?
-                              goToPage(onValue, userLocation["latitude"], userLocation["longitude"]) : makeDialog();
+                              //goToPage(onValue, userLocation["latitude"], userLocation["longitude"]) : makeDialog();
+                              goToListPage(onValue, userLocation["latitude"], userLocation["longitude"]) : makeDialog();
                             });
                           }
 
@@ -160,16 +171,37 @@ class _HomePageState extends State<HomePage> {
 
   Future<StationDetails> _getStationDetails(double lat, double lng) async {
     StationDetails details;
+    List<StationDetails> foundStations;
     try {
       //comment out this line
-      details = await getNearestFoursquareFromAssets();
+      //details = await getNearestFoursquareFromAssets();
       //uncomment this line
       //details = await findNearestTrainStationFour(lat, lng);
+      //details
+      foundStations = await findNearestTrainStationsFour(56.7007841, 16.1159646);
     } catch (e) {
       print(e.toString());
       details = null;
     }
 
     return details;
+  }
+  Future<List<StationDetails>> _getStationDetailsList(double lat, double lng) async {
+    StationDetails details;
+    List<StationDetails> foundStations;
+    try {
+      //comment out this line
+      //details = await getNearestFoursquareFromAssets();
+      //uncomment this line
+      //details = await findNearestTrainStationFour(lat, lng);
+      //details
+      //foundStations = await findNearestTrainStationsFour(56.7007841, 16.1159646);
+      foundStations = await findNearestTrainStationsFour(lat, lng);
+    } catch (e) {
+      print(e.toString());
+      details = null;
+    }
+
+    return foundStations;
   }
 }

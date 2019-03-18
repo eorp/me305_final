@@ -4,6 +4,7 @@ class StationDetails{
   List<String> _address;
   double _lat;
   double _lng;
+  int _distance;
 
   //StationDetails();
 
@@ -21,8 +22,8 @@ class StationDetails{
       this._name,
       this._address,
       this._lat,
-      this._lng
-
+      this._lng,
+      this._distance
       );
 
 
@@ -30,6 +31,11 @@ class StationDetails{
 
   set id(String value) {
     _id = value;
+  }
+
+  @override
+  String toString() {
+    return 'StationDetails{_id: $_id, _name: $_name, _address: $_address, _lat: $_lat, _lng: $_lng, _distance: $_distance}';
   }
 
   /*factory StationDetails.fromJson(Map<String, dynamic> parsedJson){
@@ -42,10 +48,7 @@ class StationDetails{
     );
   }*/
 
-  @override
-  String toString() {
-    return 'StationDetails{id: $_id, name: $_name, address: $_address.toString(), lat: $_lat, lng: $_lng}';
-  }
+
 
   String get name => _name;
 
@@ -70,5 +73,12 @@ class StationDetails{
   set name(String value) {
     _name = value;
   }
+
+  int get distance => _distance;
+
+  set distance(int value) {
+    _distance = value;
+  }
+
 
 }

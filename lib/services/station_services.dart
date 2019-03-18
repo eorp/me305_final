@@ -21,7 +21,7 @@ StationDetails _getStationDetails(String json) {
   List<StationDetails> foundStations = new List<StationDetails>();
   if(venues.length > 0) {
 
-    venues.forEach((v) => foundStations.add(new StationDetails(null,v.name,v.location.formattedAddress,v.location.lat,v.location.lng)));
+    venues.forEach((v) => foundStations.add(new StationDetails(null,v.name,v.location.formattedAddress,v.location.lat,v.location.lng, v.location.distance)));
 
   }
   List<Station> stations;
@@ -36,7 +36,7 @@ StationDetails _getStationDetails(String json) {
       if(test != null)
       {
         test.id = stations[i].id;
-        station = new StationDetails(test.id, test.name, test.address, test.lat, test.lng);
+        station = new StationDetails(test.id, test.name, test.address, test.lat, test.lng, test.distance);
       }
     }
   });
@@ -62,7 +62,7 @@ Future<StationDetails> getNearestFoursquareFromAssets() async{
   List<StationDetails> foundStations = new List<StationDetails>();
   if(venues.length > 0) {
 
-    venues.forEach((v) => foundStations.add(new StationDetails(null,v.name,v.location.formattedAddress,v.location.lat,v.location.lng)));
+    venues.forEach((v) => foundStations.add(new StationDetails(null,v.name,v.location.formattedAddress,v.location.lat,v.location.lng, v.location.distance)));
 
   }
   List<Station> stations = await loadStation();
@@ -75,7 +75,7 @@ Future<StationDetails> getNearestFoursquareFromAssets() async{
     if(test != null)
       {
         test.id = stations[i].id;
-        station = new StationDetails(test.id, test.name, test.address, test.lat, test.lng);
+        station = new StationDetails(test.id, test.name, test.address, test.lat, test.lng, test.distance);
       }
   }
   return station;
@@ -122,7 +122,7 @@ Future<StationDetails> findNearestTrainStationFour(double lt, double lg) async{
   //var lng = 16.5515;
   var lat = lt;
   var lng = lg;
-  var url = 'https://api.foursquare.com/v2/venues/search?ll=$lat,$lng&categoryId=4bf58dd8d48988d129951735&radius=5000'
+  var url = 'https://api.foursquare.com/v2/venues/search?ll=$lat,$lng&categoryId=4bf58dd8d48988d129951735'
       +'&client_id=$clientId&client_secret=$clientSecret&v=$version';
   var response = await http.get(url);
   if (response.statusCode == 200) {
@@ -133,20 +133,22 @@ Future<StationDetails> findNearestTrainStationFour(double lt, double lg) async{
     List<StationDetails> foundStations = new List<StationDetails>();
     if(venues.length > 0) {
 
-      venues.forEach((v) => foundStations.add(new StationDetails(null,v.name,v.location.formattedAddress,v.location.lat,v.location.lng)));
+      venues.forEach((v) => foundStations.add(new StationDetails(null,v.name,v.location.formattedAddress,v.location.lat,v.location.lng, v.location.distance)));
 
     }
     List<Station> stations = await loadStation();
     StationDetails test;
+    List<StationDetails> test2;
     for(var i = 0; i < stations.length; i++)
     {
       var name = stations[i].name;
-      //print('found: $name');
-      test = foundStations.firstWhere((s)=>s.name.startsWith(name),orElse: () => null);
+      print('found: $name');
+      //test = foundStations.firstWhere((s)=>s.name.startsWith(name),orElse: () => null);
+      test2 = foundStations.where((s)=>s.name.startsWith(name));
       if(test != null)
       {
         test.id = stations[i].id;
-        station = new StationDetails(test.id, test.name, test.address, test.lat, test.lng);
+        station = new StationDetails(test.id, test.name, test.address, test.lat, test.lng, test.distance);
       }
     }
     print(station.toString());
@@ -154,6 +156,69 @@ Future<StationDetails> findNearestTrainStationFour(double lt, double lg) async{
     print('Something went wrong. \nResponse Code : ${response.statusCode}');
   }
   return station;
+}
+
+Future<List<StationDetails>> findNearestTrainStationsFour(double lt, double lg) async{
+  StationDetails station;
+  // Foursquare client id
+  var clientId = 'FZIQUGWI43WQ0XYPG43MXDJGNK4MDTTS3X1XDMSJVXDENHMV';
+  // Foursquare client secret
+  var clientSecret = '2FR5JJ0J1LECYH2OA40HSKGU4C515I4DGEDUBFC0BZLX4GEY';
+  // Foursquare version date
+  var version = '20190531';
+  //var lat = 59.607;
+  //var lng = 16.5515;
+  var lat = lt;
+  var lng = lg;
+  var url = 'https://api.foursquare.com/v2/venues/search?ll=$lat,$lng&categoryId=4bf58dd8d48988d129951735'
+      +'&client_id=$clientId&client_secret=$clientSecret&v=$version';
+
+  List<StationDetails> foundStations = new List<StationDetails>();
+
+  var response = await http.get(url);
+  if (response.statusCode == 200) {
+    String responseBody = response.body;
+
+    final responseFoursquare = responseFoursquareFromJson(responseBody);
+    List<Venue> venues = responseFoursquare.response.venues;
+    if(venues.length > 0) {
+
+      venues.forEach((v) => foundStations.add(new StationDetails(null,v.name,v.location.formattedAddress,v.location.lat,v.location.lng,v.location.distance)));
+
+    }
+
+    //foundStations.forEach((s)=>print(s.toString()));
+    List<Station> stations = await loadStation();
+    StationDetails test;
+    List<StationDetails> stations2;
+    for(var i = 0; i < stations.length; i++)
+    {
+      var name = stations[i].name;
+      //print('found: $name');
+      test = foundStations.firstWhere((s)=>s.name.startsWith(name),orElse: () => null);
+      //var test2 = foundStations.where((s)=>s.name.startsWith(name));
+      //print(test2.toList());
+      if(test != null)
+      {
+        for (var s in foundStations){
+          if(s == test)
+            {
+              s.id = stations[i].id;
+            }
+        }
+        //var s = foundStations.firstWhere((e)=>e.name.startsWith(pattern))
+        //stations2.add(new StationDetails(stations[i].id, test2.iterator.current.name, test2.iterator.current.address, test2.iterator.current.lat, test2.iterator.current.lng));
+        //test.id = stations[i].id;
+        //station = new StationDetails(test.id, test.name, test.address, test.lat, test.lng);
+      }
+    }
+    //stations2.forEach((s)=>print(s));
+    //foundStations.forEach((s)=>print(s));
+  } else {
+    print('Something went wrong. \nResponse Code : ${response.statusCode}');
+  }
+
+  return foundStations;
 }
 
 Future fetchJson() async {
